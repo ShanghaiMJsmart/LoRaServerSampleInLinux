@@ -126,11 +126,11 @@ void my_message_callback(struct mosquitto *mosq, void *userdata, const struct mo
 				memset(echodata,0,sizeof(echodata));
 				strcpy((char *)echodata,(const char*)json_object_get_string(obj));
                 json_object_put(pragma);
-				for(int loop = 0;loop < MAX_NODE_NUM ;loop ++)
+				//for(int loop = 0;loop < MAX_NODE_NUM ;loop ++)
 				{
                 	pragma = json_object_new_object();
 	                json_object_object_add(pragma,"FrameType",json_object_new_string("DownData"));
-	                json_object_object_add(pragma,"NetAddr",json_object_new_int(loop));
+	                json_object_object_add(pragma,"NetAddr",json_object_new_int(iDevAddr));
 	                json_object_object_add(pragma,"Port",json_object_new_int(iPort));
 	                json_object_object_add(pragma,"ConfirmRequest",json_object_new_boolean((1.999*rand()/(RAND_MAX+1.0))));
 					json_object_object_add(pragma,"Confirm",json_object_new_boolean(isconfirmrequest));
@@ -148,10 +148,10 @@ void my_message_callback(struct mosquitto *mosq, void *userdata, const struct mo
                     printf("%s, %d\r\n",__func__,__LINE__);
 					//sprintf(topic,"%s,%s,%s,%s","LoRaWAN/",strmacaddr,"/","0123456789ABCDEF");
 					strcpy(topic,"LoRaWAN/Down/");
-                    printf("gateway = %s\r\n",stServerNodeDatabase[loop].strmacaddr);
-					strcat(topic,stServerNodeDatabase[loop].strmacaddr);
+                    printf("gateway = %s\r\n",stServerNodeDatabase[iDevAddr].strmacaddr);
+					strcat(topic,stServerNodeDatabase[iDevAddr].strmacaddr);
 					strcat(topic,"/");
-					strcat(topic,stServerNodeDatabase[loop].strDevEUI);
+					strcat(topic,stServerNodeDatabase[iDevAddr].strDevEUI);
 			        printf("%s, %d\r\n",__func__,__LINE__);
 					printf("topic = %s\r\n",topic);
                     printf("data = %s\r\n",datatosend);
