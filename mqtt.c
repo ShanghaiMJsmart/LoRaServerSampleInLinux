@@ -42,7 +42,7 @@ void my_message_callback(struct mosquitto *mosq, void *userdata, const struct mo
     uint8_t strgatewaymacaddr[6 * 2 + 1] = {0};
     if(message->payloadlen > 0)
 	{
-	    printf("%s %s\r\n", message->topic, message->payload);
+	    printf("%s\r\n%s\r\n", message->topic, message->payload);
         pstrchr = message->payload;
         if(message->payload)
         {
@@ -51,127 +51,100 @@ void my_message_callback(struct mosquitto *mosq, void *userdata, const struct mo
             {
                 return;
             }
-
-            json_object_object_get_ex(pragma,"FrameType",&obj);
+			json_object_object_get_ex(pragma,"NetAddr",&obj);
             if(obj == NULL)
             {
-				printf("Format eerror %d\r\n",__LINE__);
+                printf("Format error %d\r\n",__LINE__);
                 json_object_put(pragma);
                 return;
             }
-            if(strcmp((const char*)json_object_get_string(obj),"UpData") == 0)
-            {
-				json_object_object_get_ex(pragma,"NetAddr",&obj);
-            	if(obj == NULL)
-            	{
-                    printf("Format eerror %d\r\n",__LINE__);
-                    json_object_put(pragma);
-                    return;
-            	}
-                stServerNodeDatabase.iDevAddr = json_object_get_int(obj);
+            stServerNodeDatabase.iDevAddr = json_object_get_int(obj);
 
                 
-                json_object_object_get_ex(pragma,"Port",&obj);
-                if(obj == NULL)
-                {
-                    printf("Format eerror %d\r\n",__LINE__);
-                    json_object_put(pragma);
-                    return;
-                }
-                iPort = json_object_get_int(obj);
-                                
-                json_object_object_get_ex(pragma,"DevEUI",&obj);
-                if(obj == NULL)
-                {
-                    printf("Format eerror %d\r\n",__LINE__);
-                    json_object_put(pragma);
-                    return;
-                }
-                strcpy((char *)stServerNodeDatabase.strDevEUI,(const char*)json_object_get_string(obj));
-                memcpy(stServerNodeDatabase.strmacaddr,message->topic + strlen("LoRaWAN/Up/"),6 * 2);
-                json_object_object_get_ex(pragma,"NodeType",&obj);
-                if(obj == NULL)
-                {
-                    printf("Format eerror %d\r\n",__LINE__);
-                    json_object_put(pragma);
-                    return;
-                }
-                if(strcmp("Class C",json_object_get_string(obj)))
-                {
-                    stServerNodeDatabase.isClassC = true;
-                }
-                else
-                {
-                    stServerNodeDatabase.isClassC = false;
-                }
-                json_object_object_get_ex(pragma,"ConfirmRequest",&obj);
-	        	if(obj == NULL)
-                {
-                    printf("Format eerror %d\r\n",__LINE__);
-                    json_object_put(pragma);
-                    return;
-                }
-                isconfirmrequest = json_object_get_boolean(obj);
-				
-				json_object_object_get_ex(pragma,"Data",&obj);
-				if(obj == NULL)
-				{
-					printf("Format eerror %d\r\n",__LINE__);
-					json_object_put(pragma);
-					return;
-				}
-				memset(echodata,0,sizeof(echodata));
-				strcpy((char *)echodata,(const char*)json_object_get_string(obj));
+            json_object_object_get_ex(pragma,"Port",&obj);
+            if(obj == NULL)
+            {
+                printf("Format error %d\r\n",__LINE__);
                 json_object_put(pragma);
-				//for(int loop = 0;loop < MAX_NODE_NUM ;loop ++)
-				{
-                	pragma = json_object_new_object();
-	                json_object_object_add(pragma,"FrameType",json_object_new_string("DownData"));
-	                json_object_object_add(pragma,"NetAddr",json_object_new_int(stServerNodeDatabase.iDevAddr));
-	                json_object_object_add(pragma,"Port",json_object_new_int(iPort));
-	                json_object_object_add(pragma,"ConfirmRequest",json_object_new_boolean(1));
-					json_object_object_add(pragma,"Confirm",json_object_new_boolean(isconfirmrequest));
-                    if(iPort == 1)
-                    {
-                        if(strlen(echodata) == 2)
-                        {
-                            strcmp("00",echodata)?strcpy(echodata,"00"):strcpy(echodata,"01");
-                            json_object_object_add(pragma,"Data",json_object_new_string(echodata));
-                        }
-                        else
-                        {
-                            json_object_object_add(pragma,"Data",json_object_new_string(""));
-                        }
-                    }
-                    else
-                    {
-                        json_object_object_add(pragma,"Data",json_object_new_string(echodata));
-                    }
-	                
-                    unsigned char topic[8 + 1 + 6 * 2 + 1 + 8 * 2 + 1 + 2 + 1 + 10] = {0};
-					memset(datatosend,0,sizeof(datatosend));
-                    memset(topic,0,sizeof(topic));
-					strcpy(datatosend,json_object_to_json_string(pragma));
-	                sendlen = strlen(datatosend);
-					/*发布消息*/
-					//sprintf(topic,"%s,%s,%s,%s","LoRaWAN/",strmacaddr,"/","0123456789ABCDEF");
-					strcpy(topic,"LoRaWAN/Down/");
-                    printf("gateway = %s\r\n",stServerNodeDatabase.strmacaddr);
-					strcat(topic,stServerNodeDatabase.strmacaddr);
-					strcat(topic,"/");
-					strcat(topic,stServerNodeDatabase.strDevEUI);
-					printf("topic = %s\r\n",topic);
-                    printf("data = %s\r\n",datatosend);
-                    mosquitto_publish(mosq,NULL,topic,strlen(datatosend)+1,datatosend,0,0);
-					//mosquitto_publish(mosq,NULL,topic,strlen(datatosend)+1,sendlen,0,0);
-	                json_object_put(pragma);
-				}
+                return;
+            }
+            iPort = json_object_get_int(obj);
+                                
+            memcpy(stServerNodeDatabase.strDevEUI,message->topic + strlen("LoRaWAN/Up/") + 6 * 2 + 1,8 * 2);
+            memcpy(stServerNodeDatabase.strmacaddr,message->topic + strlen("LoRaWAN/Up/"),6 * 2);
+            json_object_object_get_ex(pragma,"NodeType",&obj);
+            if(obj == NULL)
+            {
+                printf("Format error %d\r\n",__LINE__);
+                json_object_put(pragma);
+                return;
+            }
+            if(strcmp("Class C",json_object_get_string(obj)))
+            {
+                stServerNodeDatabase.isClassC = true;
             }
             else
             {
-                printf("Format eerror %d\r\n",__LINE__);
-                json_object_put(pragma);
+                stServerNodeDatabase.isClassC = false;
             }
+            json_object_object_get_ex(pragma,"ConfirmRequest",&obj);
+	        if(obj == NULL)
+            {
+                printf("Format error %d\r\n",__LINE__);
+                json_object_put(pragma);
+                return;
+            }
+            isconfirmrequest = json_object_get_boolean(obj);
+				
+			json_object_object_get_ex(pragma,"Data",&obj);
+			if(obj == NULL)
+			{
+				printf("Format error %d\r\n",__LINE__);
+				json_object_put(pragma);
+				return;
+			}
+			memset(echodata,0,sizeof(echodata));
+			strcpy((char *)echodata,(const char*)json_object_get_string(obj));
+            json_object_put(pragma);
+            pragma = json_object_new_object();
+	        json_object_object_add(pragma,"NetAddr",json_object_new_int(stServerNodeDatabase.iDevAddr));
+	        json_object_object_add(pragma,"Port",json_object_new_int(iPort));
+	        json_object_object_add(pragma,"ConfirmRequest",json_object_new_boolean(1));
+			json_object_object_add(pragma,"Confirm",json_object_new_boolean(isconfirmrequest));
+            if(iPort == 1)
+            {
+                if(strlen(echodata) == 2)
+                {
+                    strcmp("00",echodata)?strcpy(echodata,"00"):strcpy(echodata,"01");
+                    json_object_object_add(pragma,"Data",json_object_new_string(echodata));
+                }
+                else
+                {
+                    json_object_object_add(pragma,"Data",json_object_new_string(""));
+                }
+            }
+            else
+            {
+                json_object_object_add(pragma,"Data",json_object_new_string(echodata));
+            }
+	        //json_object_object_add(pragma,"Data",json_object_new_string(""));
+            unsigned char topic[8 + 1 + 6 * 2 + 1 + 8 * 2 + 1 + 2 + 1 + 10] = {0};
+			memset(datatosend,0,sizeof(datatosend));
+            memset(topic,0,sizeof(topic));
+			strcpy(datatosend,json_object_to_json_string(pragma));
+	        sendlen = strlen(datatosend);
+			/*发布消息*/
+			//sprintf(topic,"%s,%s,%s,%s","LoRaWAN/",strmacaddr,"/","0123456789ABCDEF");
+			strcpy(topic,"LoRaWAN/Down/");
+            printf("gateway = %s\r\n",stServerNodeDatabase.strmacaddr);
+			strcat(topic,stServerNodeDatabase.strmacaddr);
+			strcat(topic,"/");
+			strcat(topic,stServerNodeDatabase.strDevEUI);
+			printf("topic = %s\r\n",topic);
+            printf("data = %s\r\n",datatosend);
+            mosquitto_publish(mosq,NULL,topic,strlen(datatosend)+1,datatosend,0,0);
+			//mosquitto_publish(mosq,NULL,topic,strlen(datatosend)+1,sendlen,0,0);
+	        json_object_put(pragma);
             //memset(buffer,0,1024 * 100);
         }
     }else{
