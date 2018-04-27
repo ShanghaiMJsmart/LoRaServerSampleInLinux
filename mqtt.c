@@ -128,14 +128,14 @@ void my_message_callback(struct mosquitto *mosq, void *userdata, const struct mo
                 json_object_object_add(pragma,"Data",json_object_new_string(echodata));
             }
 	        //json_object_object_add(pragma,"Data",json_object_new_string(""));
-            unsigned char topic[8 + 1 + 6 * 2 + 1 + 8 * 2 + 1 + 2 + 1 + 10] = {0};
+            unsigned char topic[8 + 1 + 6 * 2 + 1 + 8 * 2 + 1 + 2 + 1 + 10 + 10] = {0};
 			memset(datatosend,0,sizeof(datatosend));
             memset(topic,0,sizeof(topic));
 			strcpy(datatosend,json_object_to_json_string(pragma));
 	        sendlen = strlen(datatosend);
 			/*发布消息*/
 			//sprintf(topic,"%s,%s,%s,%s","LoRaWAN/",strmacaddr,"/","0123456789ABCDEF");
-			strcpy(topic,"LoRaWAN/Down/");
+			strcpy(topic,"LoRaWAN/Test/Down/");
             printf("gateway = %s\r\n",stServerNodeDatabase.strmacaddr);
 			strcat(topic,stServerNodeDatabase.strmacaddr);
 			strcat(topic,"/");
@@ -156,10 +156,10 @@ void my_message_callback(struct mosquitto *mosq, void *userdata, const struct mo
 void my_connect_callback(struct mosquitto *mosq, void *userdata, int result)
 {
     int i;
-    unsigned char topic[8 + 1 + 6 * 2 + 2 + 1] = {0};
+    unsigned char topic[8 + 1 + 6 * 2 + 2 + 1 + 10] = {0};
     if(!result){
         /* Subscribe to broker information topics on successful connect. */
-        strcpy(topic,"LoRaWAN/Up");
+        strcpy(topic,"LoRaWAN/Test/Up");
         strcat(topic,"/#");
         mosquitto_subscribe(mosq, NULL, topic, 2);
         printf("topic = %s\r\n",topic);
