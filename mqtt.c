@@ -70,8 +70,8 @@ void my_message_callback(struct mosquitto *mosq, void *userdata, const struct mo
             }
             iPort = json_object_get_int(obj);
                                 
-            memcpy(stServerNodeDatabase.strDevEUI,message->topic + strlen("LoRaWAN/Up/") + 6 * 2 + 1,8 * 2);
-            memcpy(stServerNodeDatabase.strmacaddr,message->topic + strlen("LoRaWAN/Up/"),6 * 2);
+            memcpy(stServerNodeDatabase.strDevEUI,message->topic + strlen("LoRaWAN/Test/Up/") + 6 * 2 + 1,8 * 2);
+            memcpy(stServerNodeDatabase.strmacaddr,message->topic + strlen("LoRaWAN/Test/Up/"),6 * 2);
             json_object_object_get_ex(pragma,"NodeType",&obj);
             if(obj == NULL)
             {
