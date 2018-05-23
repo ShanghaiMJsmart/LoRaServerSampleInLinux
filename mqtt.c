@@ -109,7 +109,7 @@ void my_message_callback(struct mosquitto *mosq, void *userdata, const struct mo
             pragma = json_object_new_object();
 	        json_object_object_add(pragma,"NetAddr",json_object_new_int(stServerNodeDatabase.iDevAddr));
 	        json_object_object_add(pragma,"Port",json_object_new_int(iPort));
-	        json_object_object_add(pragma,"ConfirmRequest",json_object_new_boolean(1));
+	        json_object_object_add(pragma,"ConfirmRequest",json_object_new_boolean(0));
 			json_object_object_add(pragma,"Confirm",json_object_new_boolean(isconfirmrequest));
             if(iPort == 1)
             {
