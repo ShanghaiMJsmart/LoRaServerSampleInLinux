@@ -9,7 +9,7 @@
 #include <json-c/json.h>
 #include <errno.h>
 
-#define HOST "101.132.97.241"
+#define HOST "61.180.213.246"
 #define PORT  1883
 
 #define KEEP_ALIVE 60
@@ -70,8 +70,8 @@ void my_message_callback(struct mosquitto *mosq, void *userdata, const struct mo
             }
             iPort = json_object_get_int(obj);
                                 
-            memcpy(stServerNodeDatabase.strDevEUI,message->topic + strlen("LoRaWAN/Test/Up/") + 6 * 2 + 1,8 * 2);
-            memcpy(stServerNodeDatabase.strmacaddr,message->topic + strlen("LoRaWAN/Test/Up/"),6 * 2);
+            memcpy(stServerNodeDatabase.strDevEUI,message->topic + strlen("LoRaWAN/Up/") + 6 * 2 + 1,8 * 2);
+            memcpy(stServerNodeDatabase.strmacaddr,message->topic + strlen("LoRaWAN/Up/"),6 * 2);
             json_object_object_get_ex(pragma,"NodeType",&obj);
             if(obj == NULL)
             {
@@ -109,7 +109,7 @@ void my_message_callback(struct mosquitto *mosq, void *userdata, const struct mo
             pragma = json_object_new_object();
 	        json_object_object_add(pragma,"NetAddr",json_object_new_int(stServerNodeDatabase.iDevAddr));
 	        json_object_object_add(pragma,"Port",json_object_new_int(iPort));
-	        json_object_object_add(pragma,"ConfirmRequest",json_object_new_boolean(0));
+	        json_object_object_add(pragma,"ConfirmRequest",json_object_new_boolean(1));
 			json_object_object_add(pragma,"Confirm",json_object_new_boolean(isconfirmrequest));
             if(iPort == 1)
             {
@@ -135,7 +135,7 @@ void my_message_callback(struct mosquitto *mosq, void *userdata, const struct mo
 	        sendlen = strlen(datatosend);
 			/*发布消息*/
 			//sprintf(topic,"%s,%s,%s,%s","LoRaWAN/",strmacaddr,"/","0123456789ABCDEF");
-			strcpy(topic,"LoRaWAN/Test/Down/");
+			strcpy(topic,"LoRaWAN/Down/");
             printf("gateway = %s\r\n",stServerNodeDatabase.strmacaddr);
 			strcat(topic,stServerNodeDatabase.strmacaddr);
 			strcat(topic,"/");
@@ -159,7 +159,7 @@ void my_connect_callback(struct mosquitto *mosq, void *userdata, int result)
     unsigned char topic[8 + 1 + 6 * 2 + 2 + 1 + 10] = {0};
     if(!result){
         /* Subscribe to broker information topics on successful connect. */
-        strcpy(topic,"LoRaWAN/Test/Up");
+        strcpy(topic,"LoRaWAN/Up");
         strcat(topic,"/#");
         mosquitto_subscribe(mosq, NULL, topic, 2);
         printf("topic = %s\r\n",topic);
